@@ -16,6 +16,13 @@ PG_CONF="${CONF_DIRECTORY}/main/postgresql.conf"
 PG_AUTOTUNE_CONF="${CONF_DIRECTORY}/main/postgresql.autotune.conf"
 PG_HBA="${CONF_DIRECTORY}/main/pg_hba.conf"
 
+ARCHIVE_COMMAND="/usr/bin/archive.sh"
+PDNOTIFY_COMMAND="/usr/bin/pdnotify.sh"
+SERVICE_KEY="1"
+INCIDENT_KEY='A'
+STACK='TEST'
+HANDLE='TEST-DB'
+
 function pg_init_ssl () {
   mkdir -p "$SSL_DIRECTORY"
 
@@ -40,6 +47,20 @@ function pg_init_ssl () {
   chmod 600 "$ssl_cert_file" "$ssl_key_file"
 }
 
+function pg_init_archive_command () {
+  cat "${ARCHIVE_COMMAND}.template"\
+    | sed "s:__ARCHIVE_DIRECTORY__:${ARCHIVE_DIRECTORY}:g" \
+    > "${ARCHIVE_COMMAND}"
+
+  cat "${PDNOTIFY_COMMAND}.template"\
+     | sed "s:__SERVICE_KEY__:${SERVICE_KEY}:g" \
+     | sed "s:__INCIDENT_KEY__:${INCIDENT_KEY}:g" \
+     | sed "s:__STACK__:${STACK}:g" \
+     | sed "s:__HANDLE__:${HANDLE}:g" \
+    > "${PDNOTIFY_COMMAND}"
+
+}
+
 function pg_init_conf () {
   # Set up the PG config files
 
@@ -55,6 +76,8 @@ function pg_init_conf () {
     | sed "s:__PG_VERSION__:${PG_VERSION}:g" \
     | sed "s:__PRELOAD_LIB__:${PRELOAD_LIB}:g"\
     | sed "s:__PG_AUTOTUNE_CONF__:${PG_AUTOTUNE_CONF}:g"\
+    | sed "s:__ARCHIVE_COMMAND__:${ARCHIVE_COMMAND}:g"\
+    | sed "s:__PDNOTIFY_COMMAND__:${PDNOTIFY_COMMAND}:g"\
     > "${PG_CONF}"
 
   cat "${PG_HBA}.template"\
@@ -66,6 +89,7 @@ function pg_init_conf () {
 
   # Ensure we have a certificate, either from the environment, the filesystem,
   # or just a random one.
+  pg_init_archive_command
   pg_init_ssl
 }
 

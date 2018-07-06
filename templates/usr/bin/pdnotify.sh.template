@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+EVENT_ENDPOINT='https://events.pagerduty.com/generic/2010-04-15/create_event.json'
+
+# wget $EVENT_ENDPOINT  --header='Content-Type: application/json' --post-data 'ServiceKey=__SERVICE_KEY__&Type=trigger&IncidentKey=__INCIDENT_KEY__&Description=Archive command failed for __STACK__ -- __HANDLE__'
+
+exit 1
