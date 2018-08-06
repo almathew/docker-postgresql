@@ -31,7 +31,7 @@ shared_buffers = 128MB
 #------------------------------------------------------------------------------
 
 archive_mode = on
-archive_command = '/bin/sh __ARCHIVE_COMMAND__ "%p" "%f" || /bin/sh __PDNOTIFY_COMMAND__'
+archive_command = '/bin/bash __ARCHIVE_COMMAND__ "%p" "%f"'
 
 #------------------------------------------------------------------------------
 # REPLICATION

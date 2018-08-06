@@ -47,20 +47,6 @@ function pg_init_ssl () {
   chmod 600 "$ssl_cert_file" "$ssl_key_file"
 }
 
-function pg_init_archive_command () {
-  cat "${ARCHIVE_COMMAND}.template"\
-    | sed "s:__ARCHIVE_DIRECTORY__:${ARCHIVE_DIRECTORY}:g" \
-    > "${ARCHIVE_COMMAND}"
-
-  cat "${PDNOTIFY_COMMAND}.template"\
-     | sed "s:__SERVICE_KEY__:${SERVICE_KEY}:g" \
-     | sed "s:__INCIDENT_KEY__:${INCIDENT_KEY}:g" \
-     | sed "s:__STACK__:${STACK}:g" \
-     | sed "s:__HANDLE__:${HANDLE}:g" \
-    > "${PDNOTIFY_COMMAND}"
-
-}
-
 function pg_init_conf () {
   # Set up the PG config files
 
@@ -89,7 +75,6 @@ function pg_init_conf () {
 
   # Ensure we have a certificate, either from the environment, the filesystem,
   # or just a random one.
-  pg_init_archive_command
   pg_init_ssl
 }
 
@@ -97,6 +82,12 @@ function pg_init_conf () {
 function pg_init_data () {
   chown -R postgres:postgres "$DATA_DIRECTORY"
   chmod go-rwx "$DATA_DIRECTORY"
+}
+
+
+function pg_init_archive () {
+  chown -R postgres:postgres "$ARCHIVE_DIRECTORY"
+  chmod go-rwx "$ARCHIVE_DIRECTORY"
 }
 
 
@@ -114,6 +105,7 @@ function pg_run_server () {
 if [[ "$1" == "--initialize" ]]; then
   pg_init_conf
   pg_init_data
+  pg_init_archive
 
   gosu postgres "/usr/lib/postgresql/$PG_VERSION/bin/initdb" -D "$DATA_DIRECTORY"
   gosu postgres /etc/init.d/postgresql start
@@ -135,6 +127,7 @@ elif [[ "$1" == "--initialize-from" ]]; then
 
   pg_init_conf
   pg_init_data
+  pg_init_archive
 
   # TODO: We force ssl=true here, but it's not entirely correct to do so. Perhaps Sweetness should be providing this.
   # TODO: Either way, we should respect whatever came in via the original URL..!
