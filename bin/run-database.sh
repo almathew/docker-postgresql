@@ -16,8 +16,6 @@ PG_CONF="${CONF_DIRECTORY}/main/postgresql.conf"
 PG_AUTOTUNE_CONF="${CONF_DIRECTORY}/main/postgresql.autotune.conf"
 PG_HBA="${CONF_DIRECTORY}/main/pg_hba.conf"
 
-ARCHIVE_COMMAND="/usr/bin/archive.sh"
-PDNOTIFY_COMMAND="/usr/bin/pdnotify.sh"
 SERVICE_KEY="1"
 INCIDENT_KEY='A'
 STACK='TEST'
@@ -62,8 +60,6 @@ function pg_init_conf () {
     | sed "s:__PG_VERSION__:${PG_VERSION}:g" \
     | sed "s:__PRELOAD_LIB__:${PRELOAD_LIB}:g"\
     | sed "s:__PG_AUTOTUNE_CONF__:${PG_AUTOTUNE_CONF}:g"\
-    | sed "s:__ARCHIVE_COMMAND__:${ARCHIVE_COMMAND}:g"\
-    | sed "s:__PDNOTIFY_COMMAND__:${PDNOTIFY_COMMAND}:g"\
     > "${PG_CONF}"
 
   cat "${PG_HBA}.template"\

@@ -87,4 +87,4 @@ ADD test /tmp/test
 
 VOLUME ["$DATA_DIRECTORY", "$ARCHIVE_DIRECTORY"]
 EXPOSE 5432
-CMD tail -f /dev/null
+ENTRYPOINT ["/usr/bin/run-database.sh"]
