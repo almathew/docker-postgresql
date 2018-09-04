@@ -16,11 +16,6 @@ PG_CONF="${CONF_DIRECTORY}/main/postgresql.conf"
 PG_AUTOTUNE_CONF="${CONF_DIRECTORY}/main/postgresql.autotune.conf"
 PG_HBA="${CONF_DIRECTORY}/main/pg_hba.conf"
 
-SERVICE_KEY="1"
-INCIDENT_KEY='A'
-STACK='TEST'
-HANDLE='TEST-DB'
-
 function pg_init_ssl () {
   mkdir -p "$SSL_DIRECTORY"
 
