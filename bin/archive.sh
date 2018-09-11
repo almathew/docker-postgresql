@@ -7,7 +7,7 @@ WAL_FILE_NAME=$2
 EVENT_ENDPOINT='https://events.pagerduty.com/generic/2010-04-15/create_event.json'
 
 notify () {
-    wget $EVENT_ENDPOINT  --header='Content-Type: application/json' --post-data "ServiceKey=$SERVICE_KEY&Type=trigger&IncidentKey=$INCIDENT_KEY&Description=Archive command failed for $INCIDENT_KEY"
+  sudo -u root /usr/bin/pagerduty-notify.sh
 }
 
 trap 'notify' ERR

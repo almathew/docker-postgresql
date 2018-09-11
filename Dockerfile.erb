@@ -31,9 +31,12 @@ RUN apt-install locales wget unzip sudo pwgen \
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 ENV LANG en_US.utf8
 
+RUN echo 'User_Alias  REPORTING = root, postgres' >> /etc/sudoers \
+ && echo 'REPORTING ALL = (root) NOPASSWD: /usr/bin/pagerduty-notify.sh' >> /etc/sudoers
+
 # And now install Postgres from its own repos
 ADD templates/etc/apt /etc/apt
-
+ADD templates/usr/bin /usr/bin
 
 # The package names below are anchored, becuase they're interpreted by apt as regexes
 # (because they contain "."), which can result in undesired packages being installed if
@@ -84,6 +87,7 @@ ADD bin/autotune /usr/local/bin/
 
 ADD <%= ENV.fetch 'TAG' %>/test /tmp/test
 ADD test /tmp/test
+RUN bats /tmp/test
 
 VOLUME ["$DATA_DIRECTORY", "$ARCHIVE_DIRECTORY"]
 EXPOSE 5432

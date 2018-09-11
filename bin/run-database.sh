@@ -16,6 +16,7 @@ PG_CONF="${CONF_DIRECTORY}/main/postgresql.conf"
 PG_AUTOTUNE_CONF="${CONF_DIRECTORY}/main/postgresql.autotune.conf"
 PG_HBA="${CONF_DIRECTORY}/main/pg_hba.conf"
 
+
 function pg_init_ssl () {
   mkdir -p "$SSL_DIRECTORY"
 
@@ -40,6 +41,20 @@ function pg_init_ssl () {
   chmod 600 "$ssl_cert_file" "$ssl_key_file"
 }
 
+function pg_init_pagerduty_notify () {
+    cat /usr/bin/pagerduty-notify.template \
+    | sed "s:__PAGERDUTY_INCIDENT_KEY__:${PAGERDUTY_INCIDENT_KEY}:g" \
+    | sed "s:__PAGERDUTY_IDENTIFIER__:${PAGERDUTY_IDENTIFIER}:g" \
+    | sed "s:__PAGERDUTY_INTEGRATION_KEY__:${PAGERDUTY_INTEGRATION_KEY}:g" \
+    > /usr/bin/pagerduty-notify.sh
+
+    chmod 700 /usr/bin/pagerduty-notify.sh
+
+    unset PAGERDUTY_INCIDENT_KEY
+    unset PAGERDUTY_IDENTIFIER
+    unset PAGERDUTY_INTEGRATION_KEY
+}
+
 function pg_init_conf () {
   # Set up the PG config files
 
@@ -61,12 +76,17 @@ function pg_init_conf () {
     | sed "s:__AUTH_METHOD__:${AUTH_METHOD}:g" \
     > "${PG_HBA}"
 
+  cat "${PG_HBA}.template"\
+    | sed "s:__AUTH_METHOD__:${AUTH_METHOD}:g" \
+    > "${PG_HBA}"
+
   # Write the autotune configuration
   /usr/local/bin/autotune > "$PG_AUTOTUNE_CONF"
 
   # Ensure we have a certificate, either from the environment, the filesystem,
   # or just a random one.
   pg_init_ssl
+  pg_init_pagerduty_notify
 }
 
 
@@ -80,7 +100,6 @@ function pg_init_archive () {
   chown -R postgres:postgres "$ARCHIVE_DIRECTORY"
   chmod go-rwx "$ARCHIVE_DIRECTORY"
 }
-
 
 function pg_run_server () {
   # Run pg! Remove potentially sensitive ENV and passthrough options.
@@ -155,4 +174,7 @@ else
   pg_init_conf
   pg_run_server
 
+  # If it's an existing database that is being restarted for the first time
+  # since PitR was added, this step is required to start supporting PitR.
+  pg_init_archive
 fi
