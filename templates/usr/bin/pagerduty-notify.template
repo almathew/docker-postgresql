@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-PAGERDUTY_INCIDENT_KEY=__PAGERDUTY_INCIDENT_KEY__
-PAGERDUTY_IDENTIFIER=__PAGERDUTY_IDENTIFIER__
-PAGERDUTY_INTEGRATION_KEY=__PAGERDUTY_INTEGRATION_KEY__
+EVENT_ENDPOINT=${EVENT_ENDPOINT:-"https://events.pagerduty.com/generic/2010-04-15/create_event.json"}
 
-EVENT_ENDPOINT='https://events.pagerduty.com/generic/2010-04-15/create_event.json'
-
-wget $EVENT_ENDPOINT  --header='Content-Type: application/json' --post-data "ServiceKey=$PAGERDUTY_INTEGRATION_KEY&Type=trigger&IncidentKey=$PAGERDUTY_INCIDENT_KEY&Description=Archive command failed for $PAGERDUTY_IDENTIFIER"
+wget $EVENT_ENDPOINT  -o /dev/null --header='Content-Type: application/json' \
+   --post-data '{"service_key": "__PAGERDUTY_INTEGRATION_KEY__", "event_type": "trigger", "incident_key": "__PAGERDUTY_INCIDENT_KEY__", "description": "Archive command failed for __PAGERDUTY_IDENTIFIER__"}'
