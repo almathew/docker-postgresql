@@ -31,9 +31,11 @@ RUN apt-install locales wget unzip sudo pwgen \
     && localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 ENV LANG en_US.utf8
 
+ADD templates/etc/sudoers.d /etc/sudoers.d
+
 # And now install Postgres from its own repos
 ADD templates/etc/apt /etc/apt
-
+ADD templates/usr/bin /usr/bin
 
 # The package names below are anchored, becuase they're interpreted by apt as regexes
 # (because they contain "."), which can result in undesired packages being installed if
@@ -74,15 +76,22 @@ ADD templates/etc/postgresql/PG_VERSION $CONF_DIRECTORY
 
 ENV DATA_DIRECTORY /var/db
 RUN mkdir $DATA_DIRECTORY && chown -R postgres $DATA_DIRECTORY
+ENV ARCHIVE_DIRECTORY /var/archive
+RUN mkdir $ARCHIVE_DIRECTORY && chown -R postgres $ARCHIVE_DIRECTORY
 
 ADD bin/run-database.sh /usr/bin/
 ADD bin/utilities.sh /usr/bin/
+ADD bin/archive.sh /usr/bin
+ADD bin/archive-cleanup.sh /usr/bin
 ADD bin/autotune /usr/local/bin/
 
 ADD "${TAG}"/test /tmp/test
 ADD test /tmp/test
+<<<<<<< HEAD
+# RUN bats /tmp/test
+=======
+>>>>>>> 9d22c9fbd979cb7c9910351d32c1b4f97a00a808
 
-VOLUME ["$DATA_DIRECTORY"]
+VOLUME ["$DATA_DIRECTORY", "$ARCHIVE_DIRECTORY"]
 EXPOSE 5432
 ENTRYPOINT ["/usr/bin/run-database.sh"]
-
