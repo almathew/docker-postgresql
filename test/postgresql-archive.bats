@@ -33,23 +33,22 @@ source "${BATS_TEST_DIRNAME}/test_helper.sh"
 
 @test "It should have an archive command set" {
   initialize_and_start_pg
-  gosu postgres psql db -c'SHOW archive_command;' | grep "/usr/bin/archive.sh"
+  sudo -u postgres psql db -c'SHOW archive_command;' | grep "/usr/bin/archive.sh"
 }
 
 @test "It should have have archive_mode turned on" {
   initialize_and_start_pg
-  gosu postgres psql db -c'SHOW archive_mode;' | grep "on"
+  sudo -u postgres psql db -c'SHOW archive_mode;' | grep "on"
 }
 
 @test "It should not be able to read pagerduty-notify.sh as the postgres user" {
-  run gosu postgres cat /usr/bin/pagerduty-notify.sh
+  run sudo -u postgres cat /usr/bin/pagerduty-notify.sh
   [ "$status" -eq "1" ]
-  run gosu postgres sudo -u root cat /usr/bin/pagerduty-notify.sh
-  [ "$status" -eq "1" ]
+
 }
 
 @test "It should be able to run pagerduty-notify.sh as the postgres user" {
   HTTP_RESPONSE_HEAD='HTTP/1.1 200 OK'
   ( while echo "$HTTP_RESPONSE_HEAD" | nc -l 4443; do : ; done )  &
-  gosu postgres sudo -u root EVENT_ENDPOINT='127.0.0.1:4443' /usr/bin/pagerduty-notify.sh
+  sudo -u postgres sudo -u root /usr/bin/pagerduty-notify.sh
 }
